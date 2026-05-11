@@ -38,6 +38,12 @@ publish/
 **/.cache/
 **/.eslintcache
 npm-debug.log*
+logs
+*.log
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
 #######################################
 # Environment & Secrets (High Security)
