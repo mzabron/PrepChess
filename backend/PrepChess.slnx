@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/PrepChess.Api/PrepChess.Api.csproj" />
+    <Project Path="src/PrepChess.Application/PrepChess.Application.csproj" />
+    <Project Path="src/PrepChess.Domain/PrepChess.Domain.csproj" />
+    <Project Path="src/PrepChess.Infrastructure/PrepChess.Infrastructure.csproj" />
+  </Folder>
+</Solution>
