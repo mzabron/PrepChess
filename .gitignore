@@ -1,0 +1,58 @@
+#######################################
+# Root / General / OS
+#######################################
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.temp
+
+#######################################
+# .NET / C# (The Essentials)
+#######################################
+**/bin/
+**/obj/
+*.user
+*.suo
+.vs/
+.idea/
+publish/
+**/UserSecretsId
+
+#######################################
+# VS Code
+#######################################
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/mcp.json 
+
+#######################################
+# React / Node
+#######################################
+**/node_modules/
+**/build/
+**/dist/
+**/.cache/
+**/.eslintcache
+npm-debug.log*
+
+#######################################
+# Environment & Secrets (High Security)
+#######################################
+.env
+.env.*
+!.env.example
+**/appsettings.Development.json
+**/appsettings.local.json
+**/appsettings.Production.json
+
+#######################################
+# Docker & Databases
+#######################################
+docker-compose.override.yml
+*.pgsql
+*.sql.backup
+*.rdb
