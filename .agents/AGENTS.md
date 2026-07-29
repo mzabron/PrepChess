@@ -145,3 +145,38 @@ cd frontend && npx eslint . && npm run build
 - Integration tests for Infrastructure (database, SignalR)
 - Test project naming: `PrepChess.{Layer}.Tests`
 - **All tests must pass** before any PR is opened or code is committed
+
+## Project Map
+- `/backend`: The .NET 10 solution containing Clean Architecture projects.
+  - `src/PrepChess.Domain`: Core business logic, entities, and Gera.Chess integration.
+  - `src/PrepChess.Application`: CQRS handlers (MediatR), interfaces, and validation.
+  - `src/PrepChess.Infrastructure`: EF Core, PostgreSQL, Redis, SignalR dispatchers.
+  - `src/PrepChess.Api`: Controllers, SignalR Hubs, OpenAPI/Scalar, and DI wiring.
+- `/frontend`: The Vite + React 19 + TypeScript application.
+- `docker-compose.yml`: Local infrastructure (PostgreSQL, Redis).
+- `.github/workflows`: CI/CD pipelines.
+
+## Terminal Cheat Sheet
+### Run the Infrastructure (Database, Redis)
+```bash
+docker compose up -d
+```
+### Run the Backend (API & SignalR)
+```bash
+cd backend/src/PrepChess.Api
+dotnet run
+```
+*Scalar OpenAPI UI will be available at `https://localhost:<port>/scalar/v1`*
+
+### Run the Frontend
+```bash
+cd frontend
+npm run dev
+```
+
+### Formatting & Linting (Frontend)
+```bash
+cd frontend
+npm run format  # Runs Prettier
+npm run lint    # Runs ESLint
+```
