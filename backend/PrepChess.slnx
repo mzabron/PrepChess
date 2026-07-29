@@ -5,4 +5,9 @@
     <Project Path="src/PrepChess.Domain/PrepChess.Domain.csproj" />
     <Project Path="src/PrepChess.Infrastructure/PrepChess.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/PrepChess.Domain.Tests/PrepChess.Domain.Tests.csproj" />
+    <Project Path="tests/PrepChess.Application.Tests/PrepChess.Application.Tests.csproj" />
+    <Project Path="tests/PrepChess.Infrastructure.Tests/PrepChess.Infrastructure.Tests.csproj" />
+  </Folder>
 </Solution>
