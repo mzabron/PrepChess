@@ -62,3 +62,12 @@ docker-compose.override.yml
 *.pgsql
 *.sql.backup
 *.rdb
+
+#######################################
+# AI / Agent Tooling
+#######################################
+# .agents/ is TRACKED (project rules & skills shared across team)
+# Exclude ephemeral agent caches
+.gemini/
+.cursor/
+.copilot/
