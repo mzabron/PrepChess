@@ -9,42 +9,64 @@ description: Skill for maintaining Clean Architecture patterns in PrepChess .NET
 
 ```
 backend/src/
-├── PrepChess.Domain/           # Core business logic (NO dependencies)
-│   ├── Common/                 # BaseEntity, AggregateRoot, IDomainEvent
-│   ├── Entities/               # Game, User, OpeningCard
-│   ├── ValueObjects/           # Fen, Move, Rating
-│   ├── Enums/                  # GameStatus, GameResult, TimeControl
-│   ├── Events/                 # Domain events (MoveMade, GameEnded)
-│   └── Services/               # IGameEngine + GameEngine implementation
+├── PrepChess.Domain/           # Core business logic (NO dependencies except Gera.Chess)
+│   ├── Common/                 # BaseEntity, AggregateRoot, IDomainEvent, Result<T>
+│   ├── Entities/               # Match, Game, Move, User, OpeningCard, CardProgression, Deck, DeckEntry
+│   ├── ValueObjects/           # Fen, Glicko2Rating, TimeControl, MatchScore
+│   ├── Enums/                  # GameMode, GameStatus, GameResult, MatchPhase, PieceColor, CardTag
+│   ├── Events/                 # Domain events (MoveMade, GameEnded, MatchCompleted, CardBanned, CardDrafted, CardUnlocked)
+│   └── Services/               # GameEngine (Gera.Chess wrapper), Glicko2Calculator, CardProgressionService
 │
 ├── PrepChess.Application/      # Use cases (depends on Domain only)
 │   ├── Common/
-│   │   ├── Interfaces/         # IGameRepository, IApplicationDbContext, etc.
+│   │   ├── Interfaces/         # IMatchRepository, IGameRepository, IOpeningCardRepository,
+│   │   │                       # IUserRepository, ICardProgressionRepository, IDeckRepository,
+│   │   │                       # IApplicationDbContext, ICurrentUserService, ITokenService,
+│   │   │                       # IMatchmakingService
 │   │   └── Behaviors/          # ValidationBehavior, LoggingBehavior
-│   ├── Games/
-│   │   ├── Commands/           # CreateGame, MakeMove, Resign, etc.
-│   │   └── Queries/            # GetGame, GetGameHistory, etc.
-│   ├── OpeningCards/
-│   │   └── Queries/            # GetOpeningCards, GetCardsByCategory
 │   ├── Auth/
-│   │   └── Commands/           # Register, Login
+│   │   └── Commands/           # Register, Login, ExternalLogin (Google/Apple)
+│   ├── Games/
+│   │   ├── Commands/           # MakeMove, Resign, OfferDraw, AcceptDraw
+│   │   └── Queries/            # GetGame
+│   ├── Matches/
+│   │   ├── Commands/           # BanCard, DraftCard
+│   │   └── Queries/            # GetMatch, GetMatchHistory
+│   ├── Matchmaking/
+│   │   └── Commands/           # JoinQueue, LeaveQueue
+│   ├── OpeningCards/
+│   │   └── Queries/            # GetOpeningCards
+│   ├── CardProgression/
+│   │   └── Queries/            # GetCardTree, GetUnlockedCards, GetCardProgression
+│   ├── Decks/
+│   │   ├── Commands/           # CreateDeck, UpdateDeck, DeleteDeck
+│   │   └── Queries/            # GetDecks
+│   ├── Users/
+│   │   └── Queries/            # GetProfile, GetLeaderboard
 │   └── DependencyInjection.cs  # AddApplication() extension method
 │
 ├── PrepChess.Infrastructure/   # External concerns (depends on Application)
 │   ├── Persistence/
 │   │   ├── ApplicationDbContext.cs
-│   │   ├── Configurations/     # EF Core entity type configurations
+│   │   ├── Configurations/     # EF Core entity type configurations (all entities)
 │   │   ├── Repositories/       # Concrete repository implementations
-│   │   └── Migrations/         # EF Core migrations
-│   ├── Identity/               # JWT token service, CurrentUserService
-│   ├── SignalR/                # Notification handlers that use IHubContext
+│   │   ├── Migrations/         # EF Core migrations
+│   │   └── Seed/               # OpeningCardSeeder (Tier 1 starter openings)
+│   ├── Identity/               # TokenService, CurrentUserService, GoogleAuthService, AppleAuthService
+│   ├── SignalR/                # Notification handlers (MoveMade, GameEnded, MatchCompleted, CardBanned, CardDrafted, CardUnlocked)
+│   ├── Matchmaking/            # InMemoryMatchmakingService
 │   └── DependencyInjection.cs  # AddInfrastructure() extension method
 │
 └── PrepChess.Api/              # Entry point (depends on Infrastructure)
-    ├── Hubs/                   # Thin SignalR hubs
-    ├── Controllers/            # Thin REST controllers
-    ├── Middleware/              # Exception handling, request logging
+    ├── Hubs/                   # GameHub, MatchmakingHub, IGameClient
+    ├── Controllers/            # Auth, Users, OpeningCards, Matches, Decks, CardProgression
+    ├── Middleware/              # ExceptionHandlingMiddleware (RFC 7807)
     └── Program.cs              # DI composition root
+
+backend/tests/
+├── PrepChess.Domain.Tests/         # Unit tests: entities, value objects, services
+├── PrepChess.Application.Tests/    # Unit tests: handlers (mocked repos)
+└── PrepChess.Infrastructure.Tests/ # Integration tests (Testcontainers + PostgreSQL)
 ```
 
 ## CQRS Command Pattern

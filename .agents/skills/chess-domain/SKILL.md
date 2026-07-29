@@ -1,6 +1,6 @@
 ---
 name: chess-domain
-description: Skill for working with chess game logic, FEN strings, move validation, and the Gera.Chess library integration in PrepChess Domain and Application layers.
+description: Skill for working with chess game logic, FEN strings, move validation, the Gera.Chess library integration, and the Opening Card system in PrepChess Domain and Application layers.
 ---
 
 # Chess Domain Skill
@@ -43,7 +43,7 @@ Client (chess.js preview)
     → MediatR Command (MakeMoveCommand) 
       → GameEngine (Gera.Chess wrapper) 
         → Domain Event (MoveMadeDomainEvent)
-          → Notification Handler → IHubContext → Opponent
+          → Notification Handler → IHubContext → Opponent + Spectators
 ```
 
 ### Server-Authoritative Rule
@@ -67,8 +67,57 @@ public sealed record Fen
 }
 ```
 
+## Entity Relationships
+
+```
+Match (Aggregate Root)
+├── GameMode (ClassicPrep | QuickPrep | TripleDraft)
+├── TimeControl (3+0 or 10+0)
+├── Player1 / Player2 (User entities)
+├── Player1DeckSnapshot / Player2DeckSnapshot
+├── MatchPhase (WaitingForOpponent → Banning/Drafting → InProgress → Completed)
+├── BannedCards / DraftedCards
+├── FinalScore (MatchScore value object)
+└── Games[] (one Game per opening card used)
+    ├── OpeningCard (determines StartingFen)
+    ├── WhitePlayer / BlackPlayer (assigned via deck color preference)
+    ├── CurrentFen
+    ├── Moves[]
+    ├── GameStatus / GameResult
+    └── Clocks (WhiteTimeRemainingMs, BlackTimeRemainingMs)
+```
+
 ## Opening Cards and FEN
-Each `OpeningCard` stores a FEN string representing the board position after a specific opening sequence. When a game starts with an Opening Card, the `ChessBoard` is initialized with that card's FEN instead of the standard starting position.
+
+Each `OpeningCard` stores:
+- **Title** — e.g., "Queen's Gambit"
+- **FEN** — the board position after the opening moves
+- **Description** — opening character description
+- **Tags** — `List<CardTag>` (aggressive, positional, theoretical, sharp, solid, easy, hard)
+- **ECO Code** — standard classification (e.g., "D06")
+- **Move Sequence** — SAN moves leading to the FEN (for display)
+- **Tier** — 1 = starter (free), 2+ = unlockable
+- **ParentCardId** — nullable, forms progression tree
+- **UnlockGamesRequired / UnlockWinsRequired** — conditions to unlock from parent
+
+When a game starts with an Opening Card, the `ChessBoard` is initialized with that card's FEN instead of the standard starting position.
+
+### Card Progression Tree
+```
+Queen's Gambit (Tier 1, free)
+├── QG Declined (Tier 2) — 20 games in QG
+├── QG Accepted (Tier 2) — 15 games in QG
+│   └── QGA Central Var (Tier 3) — 10 wins in QGA
+└── Catalan Game (Tier 2) — 30 games in QG
+```
+
+## Deck Building
+- Players build decks before queueing for a match
+- Each `DeckEntry` pairs an `OpeningCard` with a `PreferredColor` (White/Black)
+- Classic Prep: 4 cards per deck
+- Quick Prep: 1 card per deck
+- Triple Draft: cards are drafted in-match (no pre-built deck)
+- The color choice is locked in at deck-building time and visible to the opponent during banning
 
 ## Time Controls
 - Currently supported: `3+0` (blitz), `10+0` (rapid)
