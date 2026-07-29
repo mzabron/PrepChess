@@ -4,6 +4,7 @@
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.1" />
     <!-- Pin to patched version to fix GHSA-v5pm-xwqc-g5wc vulnerability -->
     <PackageReference Include="Microsoft.OpenApi" Version="2.7.5" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.16.16" />
   </ItemGroup>
 
   <ItemGroup>
