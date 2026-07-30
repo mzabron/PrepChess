@@ -87,16 +87,24 @@ dotnet_naming_symbols.private_fields.applicable_accessibilities = private
 dotnet_naming_style.underscore_prefix.required_prefix = _
 dotnet_naming_style.underscore_prefix.capitalization = camel_case
 
-#######################################
-# Suppress noisy rules for clean builds
-#######################################
 [*.cs]
-# CA1062: Validate arguments of public methods — too noisy with nullable enabled
-dotnet_diagnostic.CA1062.severity = none
 # CA1822: Mark members as static — too aggressive for handler methods
 dotnet_diagnostic.CA1822.severity = suggestion
 # IDE0058: Expression value is never used — noisy with fluent APIs
 dotnet_diagnostic.IDE0058.severity = suggestion
+
+#######################################
+# CA1062: Suppress only for framework callback files
+# where parameters are guaranteed non-null by the framework
+#######################################
+[*Handler.cs]
+dotnet_diagnostic.CA1062.severity = none
+[*Hub.cs]
+dotnet_diagnostic.CA1062.severity = none
+[*Controller.cs]
+dotnet_diagnostic.CA1062.severity = none
+[*Configuration.cs]
+dotnet_diagnostic.CA1062.severity = none
 
 #######################################
 # JSON / XML / Config files

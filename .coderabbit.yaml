@@ -3,15 +3,12 @@ reviews:
   # High-level review profile
   profile: chill
   
-  # Reduce noise by ignoring non-code files
+  # Reduce noise by ignoring generated and dependency directories
   path_filters:
-    - "!**/*.lock"
-    - "!**/package-lock.json"
     - "!**/node_modules/**"
     - "!**/bin/**"
     - "!**/obj/**"
     - "!**/dist/**"
-    - "!**/Migrations/**"
 
   # Enforce architectural rules with path-specific instructions
   path_instructions:
