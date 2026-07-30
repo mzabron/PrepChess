@@ -95,6 +95,30 @@ public sealed class MakeMoveCommandHandler(
         var game = await gameRepository.GetByIdAsync(request.GameId, ct);
         if (game is null) return Result.Failure<MoveResult>("Game not found");
 
+        // --- Authorization guards (run before any mutation) ---
+
+        // 1. Membership: player must be a participant
+        var isWhite = game.WhitePlayerId == request.PlayerId;
+        var isBlack = game.BlackPlayerId == request.PlayerId;
+        if (!isWhite && !isBlack)
+            return Result.Failure<MoveResult>("Player is not a participant in this game");
+
+        // 2. Active game: only in-progress games accept moves
+        if (game.Status != GameStatus.InProgress)
+            return Result.Failure<MoveResult>("Game is not active");
+
+        // 3. Color assignment: verify the player has the color they claim
+        var playerColor = isWhite ? PieceColor.White : PieceColor.Black;
+
+        // 4. Turn: the FEN active-color field determines whose turn it is
+        var activeColor = game.CurrentFen.ActiveColor; // 'w' or 'b' from FEN
+        var isPlayerTurn = (activeColor == 'w' && playerColor == PieceColor.White)
+                        || (activeColor == 'b' && playerColor == PieceColor.Black);
+        if (!isPlayerTurn)
+            return Result.Failure<MoveResult>("It is not your turn");
+
+        // --- Move validation & state mutation ---
+
         var moveResult = gameEngine.ValidateAndApply(
             game.CurrentFen, request.From, request.To, request.Promotion);
         

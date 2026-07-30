@@ -6,7 +6,7 @@ PrepChess is an enterprise-grade, real-time multiplayer chess platform built wit
 
 - **Backend**: .NET 10, ASP.NET Core, SignalR, EF Core, PostgreSQL
 - **Frontend**: Vite 8 + React 19 + TypeScript
-- **Architecture**: Clean Architecture (Domain → Application → Infrastructure → Api)
+- **Architecture**: Clean Architecture (Api → Infrastructure → Application → Domain)
 
 ### Pinned Versions
 

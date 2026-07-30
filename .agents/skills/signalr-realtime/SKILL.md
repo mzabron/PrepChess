@@ -25,7 +25,7 @@ public sealed class GameHub : Hub<IGameClient>
             Promotion: request.Promotion
         );
         
-        var result = await _mediator.Send(command);
+        var result = await _mediator.Send(command, Context.ConnectionAborted);
         
         if (!result.IsSuccess)
             throw new HubException(result.Error);
