@@ -77,8 +77,7 @@ ESLint should **never** report formatting issues — `eslint-config-prettier` di
 ### Commands
 
 ```bash
-cd frontend && npx eslint .        # Check — must pass with zero errors
-cd frontend && npm run lint        # Same via npm script
+cd frontend && npm run lint        # Check — must pass with zero errors
 ```
 
 ---
@@ -114,5 +113,5 @@ Ignore file: `frontend/.prettierignore` (skips `node_modules`, `dist`, `build`)
 
 ```bash
 cd frontend && npm run format              # Auto-format all files
-cd frontend && npx prettier --check .      # Check without modifying (CI mode)
+cd frontend && npm run format:check        # Check without modifying (CI mode)
 ```
