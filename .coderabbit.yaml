@@ -1,0 +1,80 @@
+language: en
+reviews:
+  # High-level review profile
+  profile: chill
+  
+  # Reduce noise by ignoring generated and dependency directories
+  path_filters:
+    - "!**/node_modules/**"
+    - "!**/bin/**"
+    - "!**/obj/**"
+    - "!**/dist/**"
+
+  # Enforce architectural rules with path-specific instructions
+  path_instructions:
+    - path: "backend/src/PrepChess.Domain/**"
+      instructions: |
+        This is the Domain layer — the innermost ring of Clean Architecture.
+        STRICTLY enforce:
+        - ZERO dependencies on Infrastructure, Application, or Api projects
+        - No EF Core attributes, no MediatR references, no ASP.NET references
+        - Only pure C#, value objects, entities, domain events, and Gera.Chess
+        - Entities should use Guid IDs and include CreatedAt/UpdatedAt timestamps
+        - Use sealed classes, record types for value objects, and file-scoped namespaces
+
+    - path: "backend/src/PrepChess.Application/**"
+      instructions: |
+        This is the Application layer — contains use cases (CQRS commands/queries).
+        Enforce:
+        - Depends ONLY on Domain. Must NOT reference Infrastructure or Api
+        - Commands follow {Verb}{Noun}Command naming (e.g., MakeMoveCommand)
+        - Queries follow Get{Noun}Query naming (e.g., GetGameQuery)
+        - All handlers must accept CancellationToken
+        - Interfaces for repositories/services are DEFINED here (implemented in Infrastructure)
+        - Use Result<T> pattern for expected failures, not exceptions
+
+    - path: "backend/src/PrepChess.Infrastructure/**"
+      instructions: |
+        This is the Infrastructure layer — implements interfaces from Application.
+        Enforce:
+        - Depends on Application and Domain. Must NOT reference Api
+        - Repository implementations use EF Core and implement Application-defined interfaces
+        - NO SignalR hub types here (GameHub/IGameClient live in Api) — pushing to
+          clients is done by domain-event notification handlers in the Api layer
+        - Identity and JWT logic lives here
+        - Domain events are dispatched in SaveChangesAsync override
+
+    - path: "backend/src/PrepChess.Api/**"
+      instructions: |
+        This is the Api/Presentation layer — thin entry point.
+        Enforce:
+        - SignalR hubs must be THIN: only parse input and call mediator.Send()
+        - Controllers must be THIN: only map HTTP to MediatR commands/queries
+        - No business logic in hubs or controllers
+        - Use strongly-typed hubs (Hub<IGameClient>)
+        - Domain-event notification handlers that push to clients live here and use
+          IHubContext<GameHub, IGameClient> — they must only map DTOs, no business logic
+        - All routes should use kebab-case
+
+    - path: "frontend/src/**"
+      instructions: |
+        React + TypeScript frontend.
+        Enforce:
+        - Functional components only (no class components)
+        - Named exports only (no default exports)
+        - Custom hooks must be prefixed with "use" (e.g., useSignalR, useGame)
+        - TypeScript strict mode
+        - chess.js is for client-side preview ONLY — server is authoritative for game state
+
+  # Auto-review settings
+  auto_review:
+    enabled: true
+    drafts: false
+    # Re-run the review whenever new commits are pushed, so CodeRabbit re-checks
+    # code that was updated in response to an existing review thread.
+    auto_incremental_review: true
+
+# Let CodeRabbit reply on review threads (e.g. confirming whether a previously
+# flagged issue was resolved by a new commit) without needing to be @-mentioned.
+chat:
+  auto_reply: true

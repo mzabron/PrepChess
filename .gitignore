@@ -62,3 +62,10 @@ docker-compose.override.yml
 *.pgsql
 *.sql.backup
 *.rdb
+
+#######################################
+# AI / Agent Tooling
+#######################################
+.gemini/
+.cursor/
+.copilot/
