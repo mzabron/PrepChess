@@ -53,12 +53,12 @@ backend/src/
 │   │   ├── Migrations/         # EF Core migrations
 │   │   └── Seed/               # OpeningCardSeeder (Tier 1 starter openings)
 │   ├── Identity/               # TokenService, CurrentUserService, GoogleAuthService, AppleAuthService
-│   ├── SignalR/                # Notification handlers (MoveMade, GameEnded, MatchCompleted, CardBanned, CardDrafted, CardUnlocked)
 │   ├── Matchmaking/            # InMemoryMatchmakingService
 │   └── DependencyInjection.cs  # AddInfrastructure() extension method
 │
 └── PrepChess.Api/              # Entry point (depends on Infrastructure)
     ├── Hubs/                   # GameHub, MatchmakingHub, IGameClient
+    ├── Notifications/          # Domain-event handlers pushing via IHubContext (MoveMade, GameEnded, MatchCompleted, CardBanned, CardDrafted, CardUnlocked)
     ├── Controllers/            # Auth, Users, OpeningCards, Matches, Decks, CardProgression
     ├── Middleware/              # ExceptionHandlingMiddleware (RFC 7807)
     └── Program.cs              # DI composition root
@@ -215,7 +215,7 @@ builder.Services.AddInfrastructure(builder.Configuration);
 ## Domain Events Flow
 1. Entity raises event: `game.AddDomainEvent(new MoveMadeDomainEvent(...))`
 2. `SaveChangesAsync` override in DbContext dispatches events via MediatR
-3. `INotificationHandler<MoveMadeDomainEvent>` in Infrastructure pushes to SignalR
+3. `INotificationHandler<MoveMadeDomainEvent>` in Api (`Api/Notifications/`) pushes to SignalR via `IHubContext`
 
 ## Optimistic Concurrency (Game Mutations)
 

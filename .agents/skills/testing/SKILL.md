@@ -9,22 +9,22 @@ description: Skill for testing conventions, frameworks, and patterns in PrepChes
 
 ### Frameworks & Libraries
 
-| Package                        | Version | Layer             | Purpose                                      |
-| :----------------------------- | :------ | :---------------- | :------------------------------------------- |
-| `xunit`                        | 2.x     | All               | Test framework (facts, theories, fixtures)    |
-| `xunit.runner.visualstudio`    | 2.x     | All               | Test discovery and execution in IDE/CI        |
-| `Microsoft.NET.Test.Sdk`       | 17.x    | All               | MSBuild integration for `dotnet test`         |
-| `FluentAssertions`             | 8.x     | All               | Expressive assertion syntax                   |
-| `NSubstitute`                  | 5.x     | Application       | Mocking interfaces (repos, services)          |
-| `Testcontainers.PostgreSql`    | 4.x     | Infrastructure    | Spin up real PostgreSQL in Docker for tests   |
+| Package                     | Version | Layer          | Purpose                                     |
+| :-------------------------- | :------ | :------------- | :------------------------------------------ |
+| `xunit`                     | 2.x     | All            | Test framework (facts, theories, fixtures)  |
+| `xunit.runner.visualstudio` | 2.x     | All            | Test discovery and execution in IDE/CI      |
+| `Microsoft.NET.Test.Sdk`    | 17.x    | All            | MSBuild integration for `dotnet test`       |
+| `FluentAssertions`          | 8.x     | All            | Expressive assertion syntax                 |
+| `NSubstitute`               | 5.x     | Application    | Mocking interfaces (repos, services)        |
+| `Testcontainers.PostgreSql` | 4.x     | Infrastructure | Spin up real PostgreSQL in Docker for tests |
 
 ### Test Project Mapping
 
-| Test Project                          | Tests For                           | Style         |
-| :------------------------------------ | :---------------------------------- | :------------ |
-| `PrepChess.Domain.Tests`              | Entities, value objects, services   | Unit          |
-| `PrepChess.Application.Tests`         | MediatR handlers, validators       | Unit (mocked) |
-| `PrepChess.Infrastructure.Tests`      | EF Core repos, DbContext, SignalR   | Integration   |
+| Test Project                     | Tests For                         | Style         |
+| :------------------------------- | :-------------------------------- | :------------ |
+| `PrepChess.Domain.Tests`         | Entities, value objects, services | Unit          |
+| `PrepChess.Application.Tests`    | MediatR handlers, validators      | Unit (mocked) |
+| `PrepChess.Infrastructure.Tests` | EF Core repos, DbContext, SignalR | Integration   |
 
 ### Naming Convention
 
@@ -33,12 +33,14 @@ PrepChess.{Layer}.Tests
 ```
 
 Test classes and methods follow:
+
 ```text
 {ClassUnderTest}Tests.cs
 {Method}_{Scenario}_{ExpectedResult}
 ```
 
 Example:
+
 ```csharp
 public sealed class MakeMoveCommandHandlerTests
 {
@@ -67,10 +69,9 @@ public async Task Handle_ValidMove_ReturnsSuccessWithNewFen()
 {
     // Arrange
     var game = CreateTestGame(GameStatus.InProgress);
-    _mockCurrentUser.Setup(x => x.UserId).Returns(game.WhitePlayerId);
-    _mockGameRepo.Setup(x => x.GetByIdAsync(game.Id, It.IsAny<CancellationToken>()))
-        .ReturnsAsync(game);
-    _mockGameEngine.Setup(x => x.ValidateAndApply(It.IsAny<Fen>(), "e2", "e4", null))
+    _currentUser.UserId.Returns(game.WhitePlayerId);
+    _gameRepo.GetByIdAsync(game.Id, Arg.Any<CancellationToken>()).Returns(game);
+    _gameEngine.ValidateAndApply(Arg.Any<Fen>(), "e2", "e4", null)
         .Returns(MoveResult.Valid(new Fen("..."), "e4"));
 
     var command = new MakeMoveCommand(game.Id, "e2", "e4");
@@ -81,9 +82,8 @@ public async Task Handle_ValidMove_ReturnsSuccessWithNewFen()
     // Assert
     result.IsSuccess.Should().BeTrue();
     result.Value.NewFen.Should().NotBeNull();
-    _mockGameRepo.Verify(
-        x => x.UpdateAsync(It.IsAny<Game>(), It.IsAny<CancellationToken>()),
-        Times.Once);
+    await _gameRepo.Received(1)
+        .UpdateAsync(Arg.Any<Game>(), Arg.Any<CancellationToken>());
 }
 ```
 
@@ -107,6 +107,7 @@ public sealed class MakeMoveCommandHandlerTests
 ```
 
 Key NSubstitute patterns:
+
 ```csharp
 // Return value
 _gameRepo.GetByIdAsync(gameId, Arg.Any<CancellationToken>()).Returns(game);
@@ -213,22 +214,24 @@ cd frontend && npm install -D vitest @vitest/coverage-v8
 ```
 
 Add to `vite.config.ts`:
+
 ```typescript
 /// <reference types="vitest/config" />
-import { defineConfig } from 'vite'
+import { defineConfig } from "vite";
 
 export default defineConfig({
   // ... existing config
   test: {
     globals: true,
-    environment: 'jsdom',
-    setupFiles: './src/test/setup.ts',
+    environment: "jsdom",
+    setupFiles: "./src/test/setup.ts",
     css: true,
   },
-})
+});
 ```
 
 Add script to `package.json`:
+
 ```json
 {
   "scripts": {
@@ -248,8 +251,9 @@ cd frontend && npm install -D @testing-library/react @testing-library/jest-dom @
 ```
 
 Setup file (`src/test/setup.ts`):
+
 ```typescript
-import '@testing-library/jest-dom/vitest'
+import "@testing-library/jest-dom/vitest";
 ```
 
 ### Frontend Test Pattern

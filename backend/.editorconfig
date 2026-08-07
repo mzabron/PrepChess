@@ -94,16 +94,18 @@ dotnet_diagnostic.CA1822.severity = suggestion
 dotnet_diagnostic.IDE0058.severity = suggestion
 
 #######################################
-# CA1062: Suppress only for framework callback files
-# where parameters are guaranteed non-null by the framework
+# CA1062: Suppressed only for ASP.NET Core callback entry points in the Api
+# layer, where the framework binds and guarantees the arguments it passes in.
+# Scoped to these directories on purpose — a bare *Controller.cs / *Hub.cs glob
+# would also silence the rule in tests and in any future non-Api file that
+# happens to match the name.
+# Note: CA1062 is off under the AnalysisLevel currently set in
+# Directory.Build.props (latest-recommended); these entries only take effect if
+# that is raised to latest-all.
 #######################################
-[*Handler.cs]
+[src/PrepChess.Api/Controllers/*Controller.cs]
 dotnet_diagnostic.CA1062.severity = none
-[*Hub.cs]
-dotnet_diagnostic.CA1062.severity = none
-[*Controller.cs]
-dotnet_diagnostic.CA1062.severity = none
-[*Configuration.cs]
+[src/PrepChess.Api/Hubs/*Hub.cs]
 dotnet_diagnostic.CA1062.severity = none
 
 #######################################

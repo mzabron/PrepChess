@@ -77,16 +77,18 @@ When a PR **fully completes** the work for a GitHub Issue, its description **MUS
 
 Before creating the PR, verify ALL of the following:
 
+All commands below are written to run from the **repository root**.
+
 ### Backend (if changed)
-- [ ] `dotnet build PrepChess.slnx` — zero warnings, zero errors
-- [ ] `dotnet test PrepChess.slnx` — all tests pass
+- [ ] `dotnet build backend/PrepChess.slnx` — zero warnings, zero errors
+- [ ] `dotnet test backend/PrepChess.slnx` — all tests pass
 - [ ] No Roslyn analyzer suppressions without justifying comments
 - [ ] New public methods have XML doc comments
 
 ### Frontend (if changed)
-- [ ] `npm run format` — Prettier applied
-- [ ] `npx eslint .` — zero errors
-- [ ] `npm run build` — TypeScript compiles cleanly
+- [ ] `cd frontend && npm run format:check` — Prettier clean (run `npm run format` to fix)
+- [ ] `cd frontend && npm run lint` — zero errors
+- [ ] `cd frontend && npm run build` — TypeScript compiles cleanly
 - [ ] No `eslint-disable` comments without justifying comments
 
 ### General

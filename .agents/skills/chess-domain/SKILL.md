@@ -7,7 +7,7 @@ description: Skill for working with chess game logic, FEN strings, move validati
 
 ## Gera.Chess Library Usage
 
-The backend uses **Gera.Chess** (NuGet: `Gera.Chess`, namespace: `Chess`) for all chess logic.
+The backend uses **Gera.Chess** (NuGet: `Gera.Chess`, version `1.2.0`, namespace: `Chess`) for all chess logic. The package is referenced by `PrepChess.Domain` only — the API examples below are verified against 1.2.0.
 
 ### Key API
 

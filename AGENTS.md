@@ -83,6 +83,7 @@ Api → Infrastructure → Application → Domain
 - Use **strongly-typed hubs** (`Hub<IGameClient>`)
 - All game state mutations go through MediatR commands — never mutate state in the hub
 - Use `IHubContext<GameHub, IGameClient>` in notification handlers to push events
+- Notification handlers live in **Api** (`Api/Notifications/`), not Infrastructure — Infrastructure must not reference Api
 
 ## Chess Logic Rules
 

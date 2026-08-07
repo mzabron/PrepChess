@@ -33,13 +33,17 @@ cd backend && dotnet test PrepChess.slnx     # All tests must pass
 Run after **every** frontend change, before committing:
 
 ```bash
-cd frontend && npm run format    # Prettier auto-formats all files
-cd frontend && npx eslint .      # Must pass with zero errors
-cd frontend && npm run build     # TypeScript must compile cleanly
+cd frontend && npm run format:check   # Prettier must report zero unformatted files
+cd frontend && npm run lint          # Must pass with zero errors
+cd frontend && npm run build         # TypeScript must compile cleanly
 ```
 
+These are **check-only** — they never modify your working tree, so they can't
+desync what you already staged. If `format:check` fails, run `npm run format` to
+apply Prettier, re-stage the files, then re-run the sequence.
+
 ### Order Matters
-1. **Format first** — Prettier may change files, which could affect lint results
+1. **Format first** — formatting differences would otherwise show up as lint noise
 2. **Lint second** — ESLint catches logic errors that Prettier doesn't handle
 3. **Build last** — TypeScript compilation catches type errors
 
@@ -57,8 +61,8 @@ When changes span **both** backend and frontend, run the full sequence:
 # Backend: build + test
 cd backend && dotnet build PrepChess.slnx && dotnet test PrepChess.slnx
 
-# Frontend: format + lint + build
-cd frontend && npm run format && npx eslint . && npm run build
+# Frontend: format check + lint + build
+cd frontend && npm run format:check && npm run lint && npm run build
 ```
 
 ## Commit Message Convention (Conventional Commits)

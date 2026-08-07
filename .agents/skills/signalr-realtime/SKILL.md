@@ -23,13 +23,22 @@ public sealed class GameHub : Hub<IGameClient>
             GameId: request.GameId,
             From: request.From,
             To: request.To,
-            Promotion: request.Promotion
+            Promotion: request.Promotion,
+            ExpectedVersion: request.ExpectedVersion
         );
         
         var result = await _mediator.Send(command, Context.ConnectionAborted);
         
         if (!result.IsSuccess)
             throw new HubException(result.Error);
+    }
+
+    public async Task RejoinGame(Guid gameId)
+    {
+        await Groups.AddToGroupAsync(Context.ConnectionId, gameId.ToString());
+        var state = await _mediator.Send(
+            new GetGameQuery(gameId), Context.ConnectionAborted);
+        await Clients.Caller.GameStateSync(state);
     }
 }
 ```
@@ -43,11 +52,26 @@ public interface IGameClient
     Task GameEnded(GameEndedDto dto);
     Task OpponentJoined(PlayerDto player);
     Task TimerUpdate(TimerDto timer);
+    Task GameStateSync(GameStateSyncDto dto);
     Task Error(string message);
 }
+
+/// <summary>Full game snapshot sent on reconnect.</summary>
+public sealed record GameStateSyncDto(
+    string Fen,
+    IReadOnlyList<MoveDto> Moves,
+    long WhiteTimeRemainingMs,
+    long BlackTimeRemainingMs,
+    string Status
+);
 ```
 
-### Notification Dispatching (Infrastructure Layer)
+### Notification Dispatching (`Api/Notifications/`)
+
+Notification handlers that push to clients live in the **Api layer**, not Infrastructure —
+they depend on `GameHub`/`IGameClient`, and Infrastructure must never reference Api.
+Register them by including the Api assembly in MediatR's scan in `Program.cs`.
+
 ```csharp
 // Handles domain events and pushes to clients via IHubContext
 public sealed class MoveMadeNotificationHandler : INotificationHandler<MoveMadeDomainEvent>
@@ -83,8 +107,8 @@ const connection = new HubConnectionBuilder()
 
 ## Reconnection Strategy
 - Use `.withAutomaticReconnect()` on the client
-- On reconnect, client must call `RejoinGame(gameId)` to re-subscribe to the group
-- Server responds with full current game state (FEN + move history + timers)
+- On reconnect, client calls `RejoinGame(gameId)` (defined on `GameHub` above) to re-subscribe to the SignalR group
+- Server responds via `IGameClient.GameStateSync(GameStateSyncDto)` with the full current state (FEN, move history, timers, status)
 
 ## Future: Redis Backplane
 When scaling to multiple servers, add Redis backplane:
