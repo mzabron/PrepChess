@@ -28,12 +28,12 @@ description: Skill for testing conventions, frameworks, and patterns in PrepChes
 
 ### Naming Convention
 
-```
+```text
 PrepChess.{Layer}.Tests
 ```
 
 Test classes and methods follow:
-```
+```text
 {ClassUnderTest}Tests.cs
 {Method}_{Scenario}_{ExpectedResult}
 ```
@@ -277,7 +277,7 @@ describe('GameBoard', () => {
 
 ### Frontend Test Naming
 
-```
+```text
 {ComponentName}.test.tsx    # Component tests
 {hookName}.test.ts          # Hook tests
 {utilName}.test.ts          # Utility tests

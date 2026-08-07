@@ -11,7 +11,7 @@ All feature work branches from `main`. Never branch from another feature branch 
 
 ## Branch Naming Convention
 
-```
+```text
 feature/<issue>-{feature-name}     # New features
 fix/<issue>-{issue-description}     # Bug fixes
 refactor/<issue>-{area}             # Code refactoring

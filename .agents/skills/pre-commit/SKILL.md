@@ -65,7 +65,7 @@ cd frontend && npm run format && npx eslint . && npm run build
 
 Every commit **MUST** follow the [Conventional Commits](https://www.conventionalcommits.org/) format with a scope and the active GitHub Issue number:
 
-```
+```text
 <type>(<scope>): <description> (#<issue>)
 ```
 

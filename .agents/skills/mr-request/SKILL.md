@@ -9,7 +9,7 @@ description: Skill for creating merge/pull requests in PrepChess, including titl
 
 PR titles follow the same Conventional Commits format as commit messages, including the scope and GitHub Issue number:
 
-```
+```text
 <type>(<scope>): <description> (#<issue>)
 ```
 
@@ -67,7 +67,7 @@ When a PR **fully completes** the work for a GitHub Issue, its description **MUS
 - Place the closing keyword on its **own line at the top** of the PR description (before the `## What` section)
 - Use `Fixes` for bug fix PRs, `Closes` for feature/refactor/other PRs
 - If a PR addresses **multiple issues**, list each on a separate line:
-  ```
+  ```text
   Closes #34
   Closes #35
   ```

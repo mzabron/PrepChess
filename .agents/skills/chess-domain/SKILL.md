@@ -15,7 +15,7 @@ The backend uses **Gera.Chess** (NuGet: `Gera.Chess`, namespace: `Chess`) for al
 using Chess;
 
 // Initialize from FEN
-var board = new ChessBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+var board = ChessBoard.LoadFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 
 // Make a move (SAN notation)
 board.Move("e4");
@@ -37,7 +37,7 @@ string ascii = board.ToAscii();
 
 ## Architecture Pattern
 
-```
+```text
 Client (chess.js preview) 
   → SignalR Hub (thin) 
     → MediatR Command (MakeMoveCommand) 
@@ -57,19 +57,23 @@ Always wrap raw FEN strings in the `Fen` value object for type safety:
 public sealed record Fen
 {
     public string Value { get; }
-    
+
+    /// <summary>'w' or 'b' — extracted from the FEN active-color field.</summary>
+    public char ActiveColor { get; }
+
     public Fen(string value)
     {
         // Validate FEN format
-        var board = new ChessBoard(value); // throws if invalid
+        var board = ChessBoard.LoadFromFen(value); // throws if invalid
         Value = value;
+        ActiveColor = value.Split(' ')[1][0]; // 'w' or 'b'
     }
 }
 ```
 
 ## Entity Relationships
 
-```
+```text
 Match (Aggregate Root)
 ├── GameMode (ClassicPrep | QuickPrep | TripleDraft)
 ├── TimeControl (3+0 or 10+0)
@@ -106,7 +110,7 @@ When a game starts with an Opening Card, the `ChessBoard` is initialized with th
 
 ### Card Progression Tree
 *Note: Guest players do not participate in progression. They cannot gain experience or unlock new opening cards.*
-```
+```text
 Queen's Gambit (Tier 1, free)
 ├── QG Declined (Tier 2) — 20 games in QG
 ├── QG Accepted (Tier 2) — 15 games in QG

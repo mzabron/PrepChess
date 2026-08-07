@@ -25,6 +25,7 @@ PrepChess is an enterprise-grade, real-time multiplayer chess platform built wit
 | TypeScript           | 6.0.3         | `package.json` (6.0.2 range)       |
 | ESLint               | 10.3.0        | `package.json`                     |
 | @vitejs/plugin-react | 6.0.1         | `package.json`                     |
+| Gera.Chess           | 1.2.0         | `PrepChess.Domain.csproj`          |
 
 ## Architecture Rules
 
@@ -37,7 +38,7 @@ PrepChess is an enterprise-grade, real-time multiplayer chess platform built wit
 
 ### Dependency Direction
 
-```
+```text
 Api → Infrastructure → Application → Domain
 ```
 
@@ -153,7 +154,7 @@ Api → Infrastructure → Application → Domain
 ## Verification Rules (MANDATORY)
 
 > *Full verification sequences, troubleshooting, and commit conventions → see `pre-commit` skill.*
-
+>
 > **NEVER** commit code that fails build, test, lint, or format checks. If a check fails, fix the issue before proceeding.
 
 ## Linting & Code Analysis

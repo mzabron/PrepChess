@@ -7,7 +7,7 @@ description: Skill for maintaining Clean Architecture patterns in PrepChess .NET
 
 ## Project Structure
 
-```
+```text
 backend/src/
 ├── PrepChess.Domain/           # Core business logic (NO dependencies except Gera.Chess)
 │   ├── Common/                 # BaseEntity, AggregateRoot, IDomainEvent, Result<T>
@@ -96,8 +96,9 @@ public sealed class MakeMoveCommandHandler(
         MakeMoveCommand request, CancellationToken ct)
     {
         // --- Resolve authenticated actor (NEVER trust a client-supplied PlayerId) ---
-        var playerId = currentUser.UserId
-            ?? return Result.Failure<MoveResult>("Unauthenticated");
+        var playerId = currentUser.UserId;
+        if (playerId is null)
+            return Result.Failure<MoveResult>("Unauthenticated");
 
         var game = await gameRepository.GetByIdAsync(request.GameId, ct);
         if (game is null) return Result.Failure<MoveResult>("Game not found");
@@ -142,8 +143,15 @@ public sealed class MakeMoveCommandHandler(
         // UpdateAsync uses the EF Core concurrency token (Version) to detect
         // conflicting writes. Throws DbUpdateConcurrencyException if another
         // request modified the game between our read and write.
-        await gameRepository.UpdateAsync(game, ct);
-        
+        try
+        {
+            await gameRepository.UpdateAsync(game, ct);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            return Result.Failure<MoveResult>("Conflict: game state has changed. Reload and retry.");
+        }
+
         return Result.Success(moveResult);
     }
 }
