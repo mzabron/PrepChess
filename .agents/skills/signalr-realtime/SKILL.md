@@ -17,9 +17,10 @@ public sealed class GameHub : Hub<IGameClient>
 
     public async Task MakeMove(MakeMoveRequest request)
     {
+        // PlayerId is intentionally NOT passed here — the handler resolves
+        // the authenticated identity via ICurrentUserService to prevent spoofing.
         var command = new MakeMoveCommand(
             GameId: request.GameId,
-            PlayerId: Context.UserIdentifier!,
             From: request.From,
             To: request.To,
             Promotion: request.Promotion

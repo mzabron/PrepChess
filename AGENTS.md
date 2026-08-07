@@ -58,11 +58,7 @@ Api → Infrastructure → Application → Domain
 
 ### TypeScript (Frontend)
 
-- Use **functional components** only (no class components)
-- Use **named exports** (not default exports)
-- Use **TypeScript strict mode** (already configured)
-- Co-locate component styles (CSS Modules or scoped CSS)
-- Prefix custom hooks with `use` (e.g., `useSignalR`, `useGame`)
+> *Full conventions, project structure, component patterns, state management, and styling rules → see `frontend-conventions` skill.*
 
 ### Naming Conventions
 
@@ -100,8 +96,8 @@ Api → Infrastructure → Application → Domain
 
 #### Classic Prep (Main Mode)
 - Each player builds a **deck of 4 opening cards**, assigning a **color (White/Black) to each card** at deck-building time
-- Colors are visible to the opponent during the banning phase
-- **Banning phase**: Each player bans 3 of the opponent's 4 cards (alternating bans)
+- Colors are visible to the opponent during the banning and picking phase
+- **Banning and Picking phase**: Each player bans 2 of the opponent's 4 cards (alternating bans), and then chooses 1 card out of their own remaining 2 cards to play
 - Result: 1 surviving card per player → **2 games** (deck owner plays their chosen color)
 
 #### Quick Prep
@@ -112,6 +108,11 @@ Api → Infrastructure → Application → Domain
 #### Triple Draft
 - **Draft phase**: 3 rounds — each round shows 3 random cards, each player picks 1
 - Result: 3 cards per player → **6 games**, alternating colors
+
+### Guest Play
+- **Unranked Play:** Players can play as guests without creating an account.
+- **Matchmaking & Ratings:** Guest accounts cannot gain rating. For matchmaking purposes, they are considered to have a starting rating (e.g., 1000).
+- **Progression:** Guest accounts do not gain experience and cannot unlock new opening cards.
 
 ### Match Scoring
 - 1 point for a win, 0.5 for a draw, 0 for a loss
@@ -132,6 +133,7 @@ Api → Infrastructure → Application → Domain
 ### Authentication
 - **Email + password** via ASP.NET Core Identity
 - **Google OAuth** and **Apple Sign In** as external login providers
+- **Guest Play**: Players can play as a guest without logging in. Guest accounts are unranked only and cannot gain rating. For matchmaking purposes, they are considered to have a starting rating (e.g. 1000). They also do not gain experience to unlock new opening cards.
 
 ### Rating System
 - **Glicko-2** with separate ratings per game mode
@@ -146,72 +148,21 @@ Api → Infrastructure → Application → Domain
 
 ## Git Workflow
 
-- Branch from `main` for features: `feature/{feature-name}`
-- Keep commits atomic and descriptive
-- Run `dotnet build` before committing backend changes
-- Run `npm run build` before committing frontend changes
+> *Branching conventions → see `start-branch` skill. Pre-commit checks → see `pre-commit` skill. PR creation → see `mr-request` skill.*
 
 ## Verification Rules (MANDATORY)
 
-### After EVERY backend change, run:
+> *Full verification sequences, troubleshooting, and commit conventions → see `pre-commit` skill.*
 
-```bash
-cd backend && dotnet build PrepChess.slnx    # Must compile with zero warnings (TreatWarningsAsErrors is on)
-cd backend && dotnet test PrepChess.slnx     # All tests must pass
-```
-
-### After EVERY frontend change, run:
-
-```bash
-cd frontend && npm run format                # Prettier formatting
-cd frontend && npx eslint .                  # Must pass with zero errors
-cd frontend && npm run build                 # TypeScript must compile cleanly
-```
-
-### Before committing, verify BOTH:
-
-```bash
-# Backend: build + test + no analyzer warnings
-cd backend && dotnet build PrepChess.slnx && dotnet test PrepChess.slnx
-
-# Frontend: format + lint + build
-cd frontend && npm run format && npx eslint . && npm run build
-```
-
-> **NEVER** commit code that fails any of these checks. If a check fails, fix the issue before proceeding.
+> **NEVER** commit code that fails build, test, lint, or format checks. If a check fails, fix the issue before proceeding.
 
 ## Linting & Code Analysis
 
-### Backend (.NET)
-
-- **Roslyn Analyzers** are enabled solution-wide via `Directory.Build.props` (`AnalysisLevel: latest-recommended`)
-- **TreatWarningsAsErrors** is ON — any analyzer warning fails the build
-- **EditorConfig** (`.editorconfig`) enforces: file-scoped namespaces (error), naming conventions, formatting
-- Do NOT suppress analyzer warnings without a justifying comment explaining why
-- If adding a new suppression, prefer per-line `#pragma` over global suppression
-
-### Frontend (TypeScript/React)
-
-- **ESLint** config is in `frontend/eslint.config.js`
-- Extends: `@eslint/js` recommended, `typescript-eslint` recommended, `react-hooks`, `react-refresh`
-- **eslint-config-prettier** disables formatting rules that conflict with Prettier
-- Run `npx eslint .` from `frontend/` to check — must pass with zero errors
-- Do NOT add `eslint-disable` comments without a justifying comment explaining why
-
-### Frontend (Prettier)
-
-- **Prettier** config is in `frontend/.prettierrc`
-- Enforces: no semicolons, single quotes, 2-space indent, 100 char line width, LF line endings
-- Ignore file: `frontend/.prettierignore` (skips `node_modules`, `dist`, `build`)
-- Run `npm run format` from `frontend/` to auto-format all files
-- Prettier handles **all formatting** — ESLint handles **only logic errors**
+> *Detailed Roslyn analyzer rules, ESLint config, Prettier rules, and suppression policies → see `linting` skill.*
 
 ## Testing
 
-- Unit tests for Domain services and Application handlers
-- Integration tests for Infrastructure (database, SignalR)
-- Test project naming: `PrepChess.{Layer}.Tests`
-- **All tests must pass** before any PR is opened or code is committed
+> *Testing frameworks (xUnit, FluentAssertions, NSubstitute, Testcontainers), patterns (AAA, mocking), and frontend test stack (Vitest, React Testing Library) → see `testing` skill.*
 
 ## Project Map
 
@@ -250,20 +201,4 @@ dotnet run
 ```bash
 cd frontend
 npm run dev
-```
-
-### Formatting & Linting (Frontend)
-```bash
-cd frontend
-npm run format  # Runs Prettier
-npm run lint    # Runs ESLint
-```
-
-### Full Verification
-```bash
-# Backend
-cd backend && dotnet build PrepChess.slnx && dotnet test PrepChess.slnx
-
-# Frontend
-cd frontend && npm run format && npx eslint . && npm run build
 ```
