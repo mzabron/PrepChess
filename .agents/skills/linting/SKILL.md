@@ -31,7 +31,7 @@ Key enforced rules:
   ```csharp
   #pragma warning disable CA1062 // Validated by FluentValidation pipeline behavior
   ```
-- Never suppress `CA2007` (ConfigureAwait) — the ASP.NET Core SynchronizationContext handles this
+- `CA2007` (ConfigureAwait): suppress only in `PrepChess.Api` and `PrepChess.Infrastructure` — these are the ASP.NET Core-hosted layers, where the host is known to install no `SynchronizationContext`. Do **not** suppress it in `PrepChess.Domain` or `PrepChess.Application` — those layers must stay framework-agnostic (see Clean Architecture rules), so their caller/hosting context isn't guaranteed.
 
 ### Commands
 

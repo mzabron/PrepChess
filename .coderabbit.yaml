@@ -70,3 +70,11 @@ reviews:
   auto_review:
     enabled: true
     drafts: false
+    # Re-run the review whenever new commits are pushed, so CodeRabbit re-checks
+    # code that was updated in response to an existing review thread.
+    auto_incremental_review: true
+
+# Let CodeRabbit reply on review threads (e.g. confirming whether a previously
+# flagged issue was resolved by a new commit) without needing to be @-mentioned.
+chat:
+  auto_reply: true

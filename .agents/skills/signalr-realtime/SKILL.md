@@ -35,10 +35,18 @@ public sealed class GameHub : Hub<IGameClient>
 
     public async Task RejoinGame(Guid gameId)
     {
-        await Groups.AddToGroupAsync(Context.ConnectionId, gameId.ToString());
-        var state = await _mediator.Send(
+        // Authorize before joining the group — group membership is delivery
+        // infrastructure, not an access check. GetGameQuery resolves the caller
+        // via ICurrentUserService and fails if they're not a participant/allowed
+        // spectator, so an unauthorized caller never gets added to the group.
+        var result = await _mediator.Send(
             new GetGameQuery(gameId), Context.ConnectionAborted);
-        await Clients.Caller.GameStateSync(state);
+
+        if (!result.IsSuccess)
+            throw new HubException(result.Error);
+
+        await Groups.AddToGroupAsync(Context.ConnectionId, gameId.ToString());
+        await Clients.Caller.GameStateSync(result.Value);
     }
 }
 ```

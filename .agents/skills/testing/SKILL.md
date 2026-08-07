@@ -72,7 +72,7 @@ public async Task Handle_ValidMove_ReturnsSuccessWithNewFen()
     _currentUser.UserId.Returns(game.WhitePlayerId);
     _gameRepo.GetByIdAsync(game.Id, Arg.Any<CancellationToken>()).Returns(game);
     _gameEngine.ValidateAndApply(Arg.Any<Fen>(), "e2", "e4", null)
-        .Returns(MoveResult.Valid(new Fen("..."), "e4"));
+        .Returns(MoveResult.Valid(new Fen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1"), "e4"));
 
     var command = new MakeMoveCommand(game.Id, "e2", "e4");
 
