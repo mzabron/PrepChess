@@ -99,7 +99,7 @@ Each `OpeningCard` stores:
 - **Title** — e.g., "Queen's Gambit"
 - **FEN** — the board position after the opening moves
 - **Description** — opening character description
-- **Tags** — `List<CardTag>` (aggressive, positional, theoretical, sharp, solid, easy, hard)
+- **Style Profile** — `CardStyleProfile`, three 0–100 axis scores driving a slider/dot UI rather than discrete tags: Tactical↔Positional, Theoretical↔Intuitive, Easy↔Hard
 - **ECO Code** — standard classification (e.g., "D06")
 - **Move Sequence** — SAN moves leading to the FEN (for display)
 - **Tier** — 1 = starter (free), 2+ = unlockable

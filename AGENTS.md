@@ -125,7 +125,7 @@ Api → Infrastructure → Application → Domain
 
 ### Opening Cards
 - **Global** (same for all players) — no custom player-created cards
-- Entity: Title, FEN, Description, ECO code, Move Sequence, Tags (aggressive, positional, theoretical, etc.), Tier
+- Entity: Title, FEN, Description, ECO code, Move Sequence, Style Profile (three 0–100 axis scores for a slider UI: Tactical↔Positional, Theoretical↔Intuitive, Easy↔Hard), Tier
 - **Progression Tree**: Tier 1 cards are free. Higher-tier cards unlock by playing/winning games with their parent opening (e.g., Queen's Gambit → Catalan unlocks after 30 games in QG)
 - When building a deck, players assign a **preferred color** to each card
 
@@ -139,7 +139,7 @@ Api → Infrastructure → Application → Domain
 
 ### Rating System
 - **Glicko-2** with separate ratings per game mode
-- Initial: 1500 rating, 350 RD, 0.06 volatility
+- Initial: 1000 rating, 350 RD, 0.06 volatility
 
 ## Database Rules
 
