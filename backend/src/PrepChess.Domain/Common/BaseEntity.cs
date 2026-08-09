@@ -11,6 +11,11 @@ public abstract class BaseEntity
 
     protected BaseEntity(Guid id)
     {
+        if (id == Guid.Empty)
+        {
+            throw new ArgumentException("Id cannot be empty.", nameof(id));
+        }
+
         Id = id;
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = CreatedAt;
