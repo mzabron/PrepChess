@@ -12,8 +12,8 @@ backend/src/
 ├── PrepChess.Domain/           # Core business logic (NO dependencies except Gera.Chess)
 │   ├── Common/                 # BaseEntity, AggregateRoot, IDomainEvent, Result<T>
 │   ├── Entities/               # Match, Game, Move, User, OpeningCard, CardProgression, Deck, DeckEntry
-│   ├── ValueObjects/           # Fen, Glicko2Rating, TimeControl, MatchScore
-│   ├── Enums/                  # GameMode, GameStatus, GameResult, MatchPhase, PieceColor, CardTag
+│   ├── ValueObjects/           # Fen, Glicko2Rating, TimeControl, MatchScore, CardStyleProfile
+│   ├── Enums/                  # GameMode, GameStatus, GameResult, MatchPhase, PieceColor
 │   ├── Events/                 # Domain events (MoveMade, GameEnded, MatchCompleted, CardBanned, CardDrafted, CardUnlocked)
 │   └── Services/               # GameEngine (Gera.Chess wrapper), Glicko2Calculator, CardProgressionService
 │

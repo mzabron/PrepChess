@@ -109,6 +109,15 @@ dotnet_diagnostic.CA1062.severity = none
 dotnet_diagnostic.CA1062.severity = none
 
 #######################################
+# CA1716: `Error` conflicts with a reserved keyword in some CLS languages
+# (e.g. VB's `Error` statement). This is the Result pattern's `Error` type;
+# PrepChess is an application, not a public multi-language library, so CLS
+# compliance is not a concern. Scoped to this one file on purpose.
+#######################################
+[src/PrepChess.Domain/Common/Result.cs]
+dotnet_diagnostic.CA1716.severity = none
+
+#######################################
 # JSON / XML / Config files
 #######################################
 [*.{json,xml,csproj,props,targets}]
