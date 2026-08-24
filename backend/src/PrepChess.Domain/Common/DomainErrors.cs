@@ -1,13 +1,7 @@
 namespace PrepChess.Domain.Common;
 
-/// <summary>
-/// Centralized domain error constants grouped by entity or service.
-/// </summary>
 public static class DomainErrors
 {
-    /// <summary>
-    /// Validation errors for <see cref="Entities.OpeningCard"/> creation and updates.
-    /// </summary>
     public static class OpeningCard
     {
         public static readonly Error EmptyTitle =
@@ -38,18 +32,12 @@ public static class DomainErrors
             new("OpeningCard.UnlockWinsExceedGames", "Unlock wins required cannot exceed unlock games required.");
     }
 
-    /// <summary>
-    /// State transition errors for <see cref="Entities.CardProgression"/>.
-    /// </summary>
     public static class CardProgression
     {
         public static readonly Error AlreadyUnlocked =
             new("CardProgression.AlreadyUnlocked", "This card has already been unlocked.");
     }
 
-    /// <summary>
-    /// Business rule errors for <see cref="Services.CardProgressionService"/>.
-    /// </summary>
     public static class CardProgressionService
     {
         public static readonly Error GuestCannotProgress =
