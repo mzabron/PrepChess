@@ -126,7 +126,7 @@ Api → Infrastructure → Application → Domain
 ### Opening Cards
 - **Global** (same for all players) — no custom player-created cards
 - Entity: Title, FEN, Description, ECO code, Move Sequence, Style Profile (three 0–100 axis scores for a slider UI: Tactical↔Positional, Theoretical↔Intuitive, Easy↔Hard), Tier
-- **Progression Tree**: Tier 1 cards are free. Higher-tier cards unlock by playing/winning games with their parent opening (e.g., Queen's Gambit → Catalan unlocks after 30 games in QG)
+- **Progression Tree**: Tier 1 cards are free. Higher-tier cards unlock by playing games with their parent opening (e.g., Queen's Gambit → Catalan unlocks after 30 games in QG). Only game count matters — wins are tracked as statistics but are not required for unlocking.
 - When building a deck, players assign a **preferred color** to each card
 
 ### Spectating
