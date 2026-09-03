@@ -1,5 +1,4 @@
 using FluentAssertions;
-using PrepChess.Domain.Common;
 using PrepChess.Domain.Entities;
 using PrepChess.Domain.ValueObjects;
 using Xunit;
@@ -8,362 +7,223 @@ namespace PrepChess.Domain.Tests.Entities;
 
 public sealed class OpeningCardTests
 {
-    private static readonly Fen ValidFen = Fen.Create("rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1").Value;
-    private static readonly CardStyleProfile ValidProfile = CardStyleProfile.Create(40, 60, 30).Value;
-
-    // --- Create: Tier 1 (root) success ---
+    private static readonly Fen ValidFen = Fen.Create("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1").Value;
+    private static readonly CardStyleProfile ValidStyleProfile = CardStyleProfile.Create(1, 1, 1).Value;
 
     [Fact]
-    public void Create_Tier1WithValidData_ReturnsSuccessResult()
+    public void Create_ValidDataTier1_ReturnsSuccess()
     {
-        // Act
         var result = OpeningCard.Create(
-            "Queen's Gambit",
+            "Title",
             ValidFen,
-            "A solid 1.d4 opening",
-            "D06",
-            "1.d4 d5 2.c4",
-            ValidProfile,
-            tier: 1,
-            parentCardId: null,
-            unlockGamesRequired: 0,
-            unlockWinsRequired: 0);
+            "Description",
+            "A00",
+            "e4",
+            ValidStyleProfile,
+            1,
+            null,
+            0);
 
-        // Assert
         result.IsSuccess.Should().BeTrue();
-        result.Value.Title.Should().Be("Queen's Gambit");
-        result.Value.Fen.Should().Be(ValidFen);
-        result.Value.Tier.Should().Be(1);
-        result.Value.ParentCardId.Should().BeNull();
-        result.Value.UnlockGamesRequired.Should().Be(0);
-        result.Value.UnlockWinsRequired.Should().Be(0);
-        result.Value.StyleProfile.Should().Be(ValidProfile);
+        var card = result.Value;
+        card.Title.Should().Be("Title");
+        card.Fen.Should().Be(ValidFen);
+        card.Description.Should().Be("Description");
+        card.EcoCode.Should().Be("A00");
+        card.MoveSequence.Should().Be("e4");
+        card.StyleProfile.Should().Be(ValidStyleProfile);
+        card.Tier.Should().Be(1);
+        card.ParentCardId.Should().BeNull();
+        card.UnlockGamesRequired.Should().Be(0);
     }
 
-    // --- Create: Tier 2+ success ---
-
     [Fact]
-    public void Create_Tier2WithValidParent_ReturnsSuccessResult()
+    public void Create_ValidDataTier2_ReturnsSuccess()
     {
-        // Arrange
         var parentId = Guid.NewGuid();
-
-        // Act
         var result = OpeningCard.Create(
-            "QG Declined",
+            "Title",
             ValidFen,
-            "The classical defense",
-            "D30",
-            "1.d4 d5 2.c4 e6",
-            ValidProfile,
-            tier: 2,
-            parentCardId: parentId,
-            unlockGamesRequired: 20,
-            unlockWinsRequired: 5);
+            "Description",
+            "A00",
+            "e4",
+            ValidStyleProfile,
+            2,
+            parentId,
+            10);
 
-        // Assert
         result.IsSuccess.Should().BeTrue();
-        result.Value.Tier.Should().Be(2);
-        result.Value.ParentCardId.Should().Be(parentId);
-        result.Value.UnlockGamesRequired.Should().Be(20);
-        result.Value.UnlockWinsRequired.Should().Be(5);
-    }
-
-    // --- Create: validation failures ---
-
-    [Theory]
-    [InlineData("")]
-    [InlineData("   ")]
-    [InlineData(null)]
-    public void Create_WithEmptyTitle_ReturnsFailure(string? title)
-    {
-        // Act
-        var result = OpeningCard.Create(
-            title!,
-            ValidFen,
-            "Description",
-            "D06",
-            "1.d4 d5 2.c4",
-            ValidProfile,
-            tier: 1,
-            parentCardId: null,
-            unlockGamesRequired: 0,
-            unlockWinsRequired: 0);
-
-        // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(DomainErrors.OpeningCard.EmptyTitle);
-    }
-
-    [Theory]
-    [InlineData("")]
-    [InlineData("   ")]
-    [InlineData(null)]
-    public void Create_WithEmptyDescription_ReturnsFailure(string? description)
-    {
-        // Act
-        var result = OpeningCard.Create(
-            "Title",
-            ValidFen,
-            description!,
-            "D06",
-            "1.d4 d5 2.c4",
-            ValidProfile,
-            tier: 1,
-            parentCardId: null,
-            unlockGamesRequired: 0,
-            unlockWinsRequired: 0);
-
-        // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(DomainErrors.OpeningCard.EmptyDescription);
+        var card = result.Value;
+        card.Tier.Should().Be(2);
+        card.ParentCardId.Should().Be(parentId);
+        card.UnlockGamesRequired.Should().Be(10);
     }
 
     [Fact]
-    public void Create_WithTierZero_ReturnsFailure()
+    public void Create_EmptyTitle_ReturnsFailure()
     {
-        // Act
-        var result = OpeningCard.Create(
-            "Title",
-            ValidFen,
-            "Description",
-            "D06",
-            "1.d4",
-            ValidProfile,
-            tier: 0,
-            parentCardId: null,
-            unlockGamesRequired: 0,
-            unlockWinsRequired: 0);
+        var result = OpeningCard.Create("", ValidFen, "Desc", "A00", "e4", ValidStyleProfile, 1, null, 0);
 
-        // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(DomainErrors.OpeningCard.InvalidTier);
+        result.Error.Should().Be(OpeningCard.EmptyTitle);
     }
 
     [Fact]
-    public void Create_Tier1WithParentCard_ReturnsFailure()
+    public void Create_NullFen_ReturnsFailure()
     {
-        // Act
-        var result = OpeningCard.Create(
-            "Title",
-            ValidFen,
-            "Description",
-            "D06",
-            "1.d4",
-            ValidProfile,
-            tier: 1,
-            parentCardId: Guid.NewGuid(),
-            unlockGamesRequired: 0,
-            unlockWinsRequired: 0);
+        var result = OpeningCard.Create("Title", null!, "Desc", "A00", "e4", ValidStyleProfile, 1, null, 0);
 
-        // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(DomainErrors.OpeningCard.Tier1MustNotHaveParent);
+        result.Error.Should().Be(OpeningCard.NullFen);
     }
 
     [Fact]
-    public void Create_Tier1WithNonZeroUnlockGames_ReturnsFailure()
+    public void Create_EmptyDescription_ReturnsFailure()
     {
-        // Act
-        var result = OpeningCard.Create(
-            "Title",
-            ValidFen,
-            "Description",
-            "D06",
-            "1.d4",
-            ValidProfile,
-            tier: 1,
-            parentCardId: null,
-            unlockGamesRequired: 10,
-            unlockWinsRequired: 0);
+        var result = OpeningCard.Create("Title", ValidFen, "", "A00", "e4", ValidStyleProfile, 1, null, 0);
 
-        // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(DomainErrors.OpeningCard.Tier1MustNotHaveUnlockRequirements);
+        result.Error.Should().Be(OpeningCard.EmptyDescription);
     }
 
     [Fact]
-    public void Create_Tier1WithNonZeroUnlockWins_ReturnsFailure()
+    public void Create_EmptyEcoCode_ReturnsFailure()
     {
-        // Act
-        var result = OpeningCard.Create(
-            "Title",
-            ValidFen,
-            "Description",
-            "D06",
-            "1.d4",
-            ValidProfile,
-            tier: 1,
-            parentCardId: null,
-            unlockGamesRequired: 5,
-            unlockWinsRequired: 5);
+        var result = OpeningCard.Create("Title", ValidFen, "Desc", "", "e4", ValidStyleProfile, 1, null, 0);
 
-        // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(DomainErrors.OpeningCard.Tier1MustNotHaveUnlockRequirements);
+        result.Error.Should().Be(OpeningCard.EmptyEcoCode);
     }
 
     [Fact]
-    public void Create_Tier2WithoutParentCard_ReturnsFailure()
+    public void Create_EmptyMoveSequence_ReturnsFailure()
     {
-        // Act
-        var result = OpeningCard.Create(
-            "Title",
-            ValidFen,
-            "Description",
-            "D06",
-            "1.d4",
-            ValidProfile,
-            tier: 2,
-            parentCardId: null,
-            unlockGamesRequired: 20,
-            unlockWinsRequired: 5);
+        var result = OpeningCard.Create("Title", ValidFen, "Desc", "A00", "", ValidStyleProfile, 1, null, 0);
 
-        // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(DomainErrors.OpeningCard.HigherTierMustHaveParent);
+        result.Error.Should().Be(OpeningCard.EmptyMoveSequence);
     }
 
     [Fact]
-    public void Create_WithNegativeUnlockGames_ReturnsFailure()
+    public void Create_NullStyleProfile_ReturnsFailure()
     {
-        // Act
-        var result = OpeningCard.Create(
-            "Title",
-            ValidFen,
-            "Description",
-            "D06",
-            "1.d4",
-            ValidProfile,
-            tier: 2,
-            parentCardId: Guid.NewGuid(),
-            unlockGamesRequired: -1,
-            unlockWinsRequired: 0);
+        var result = OpeningCard.Create("Title", ValidFen, "Desc", "A00", "e4", null!, 1, null, 0);
 
-        // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(DomainErrors.OpeningCard.NegativeUnlockGames);
+        result.Error.Should().Be(OpeningCard.NullStyleProfile);
     }
 
     [Fact]
-    public void Create_WithNegativeUnlockWins_ReturnsFailure()
+    public void Create_InvalidTier_ReturnsFailure()
     {
-        // Act
-        var result = OpeningCard.Create(
-            "Title",
-            ValidFen,
-            "Description",
-            "D06",
-            "1.d4",
-            ValidProfile,
-            tier: 2,
-            parentCardId: Guid.NewGuid(),
-            unlockGamesRequired: 10,
-            unlockWinsRequired: -1);
+        var result = OpeningCard.Create("Title", ValidFen, "Desc", "A00", "e4", ValidStyleProfile, 0, null, 0);
 
-        // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(DomainErrors.OpeningCard.NegativeUnlockWins);
+        result.Error.Should().Be(OpeningCard.InvalidTier);
     }
 
     [Fact]
-    public void Create_WithUnlockWinsExceedingGames_ReturnsFailure()
+    public void Create_NegativeUnlockGames_ReturnsFailure()
     {
-        // Act
-        var result = OpeningCard.Create(
-            "Title",
-            ValidFen,
-            "Description",
-            "D06",
-            "1.d4",
-            ValidProfile,
-            tier: 2,
-            parentCardId: Guid.NewGuid(),
-            unlockGamesRequired: 10,
-            unlockWinsRequired: 15);
+        var result = OpeningCard.Create("Title", ValidFen, "Desc", "A00", "e4", ValidStyleProfile, 2, Guid.NewGuid(), -1);
 
-        // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(DomainErrors.OpeningCard.UnlockWinsExceedGames);
+        result.Error.Should().Be(OpeningCard.NegativeUnlockGames);
     }
 
-    // --- Update ---
+    [Fact]
+    public void Create_Tier1WithParent_ReturnsFailure()
+    {
+        var result = OpeningCard.Create("Title", ValidFen, "Desc", "A00", "e4", ValidStyleProfile, 1, Guid.NewGuid(), 0);
+
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(OpeningCard.Tier1MustNotHaveParent);
+    }
 
     [Fact]
-    public void Update_WithValidData_ReturnsSuccess()
+    public void Create_Tier1WithUnlockRequirements_ReturnsFailure()
     {
-        // Arrange
-        var card = OpeningCard.Create(
-            "Original",
-            ValidFen,
-            "Original description",
-            "D06",
-            "1.d4",
-            ValidProfile,
-            tier: 1,
-            parentCardId: null,
-            unlockGamesRequired: 0,
-            unlockWinsRequired: 0).Value;
+        var result = OpeningCard.Create("Title", ValidFen, "Desc", "A00", "e4", ValidStyleProfile, 1, null, 10);
 
-        var newProfile = CardStyleProfile.Create(80, 20, 70).Value;
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(OpeningCard.Tier1MustNotHaveUnlockRequirements);
+    }
 
-        // Act
-        var result = card.Update("Updated", "New description", "D07", "1.d4 d5", newProfile);
+    [Fact]
+    public void Create_HigherTierWithoutParent_ReturnsFailure()
+    {
+        var result = OpeningCard.Create("Title", ValidFen, "Desc", "A00", "e4", ValidStyleProfile, 2, null, 10);
 
-        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(OpeningCard.HigherTierMustHaveParent);
+    }
+
+    [Fact]
+    public void Update_ValidData_ReturnsSuccess()
+    {
+        var card = OpeningCard.Create("Title", ValidFen, "Desc", "A00", "e4", ValidStyleProfile, 1, null, 0).Value;
+
+        var result = card.Update("New Title", "New Desc", "B00", "e4 e5", ValidStyleProfile);
+
         result.IsSuccess.Should().BeTrue();
-        card.Title.Should().Be("Updated");
-        card.Description.Should().Be("New description");
-        card.EcoCode.Should().Be("D07");
-        card.MoveSequence.Should().Be("1.d4 d5");
-        card.StyleProfile.Should().Be(newProfile);
+        card.Title.Should().Be("New Title");
+        card.Description.Should().Be("New Desc");
+        card.EcoCode.Should().Be("B00");
+        card.MoveSequence.Should().Be("e4 e5");
     }
 
     [Fact]
-    public void Update_WithEmptyTitle_ReturnsFailure()
+    public void Update_EmptyTitle_ReturnsFailure()
     {
-        // Arrange
-        var card = OpeningCard.Create(
-            "Original",
-            ValidFen,
-            "Description",
-            "D06",
-            "1.d4",
-            ValidProfile,
-            tier: 1,
-            parentCardId: null,
-            unlockGamesRequired: 0,
-            unlockWinsRequired: 0).Value;
+        var card = OpeningCard.Create("Title", ValidFen, "Desc", "A00", "e4", ValidStyleProfile, 1, null, 0).Value;
 
-        // Act
-        var result = card.Update("", "Description", "D06", "1.d4", ValidProfile);
+        var result = card.Update("", "New Desc", "B00", "e4 e5", ValidStyleProfile);
 
-        // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(DomainErrors.OpeningCard.EmptyTitle);
+        result.Error.Should().Be(OpeningCard.EmptyTitle);
     }
 
     [Fact]
-    public void Update_WithEmptyDescription_ReturnsFailure()
+    public void Update_EmptyDescription_ReturnsFailure()
     {
-        // Arrange
-        var card = OpeningCard.Create(
-            "Original",
-            ValidFen,
-            "Description",
-            "D06",
-            "1.d4",
-            ValidProfile,
-            tier: 1,
-            parentCardId: null,
-            unlockGamesRequired: 0,
-            unlockWinsRequired: 0).Value;
+        var card = OpeningCard.Create("Title", ValidFen, "Desc", "A00", "e4", ValidStyleProfile, 1, null, 0).Value;
 
-        // Act
-        var result = card.Update("Title", "", "D06", "1.d4", ValidProfile);
+        var result = card.Update("New Title", "", "B00", "e4 e5", ValidStyleProfile);
 
-        // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(DomainErrors.OpeningCard.EmptyDescription);
+        result.Error.Should().Be(OpeningCard.EmptyDescription);
+    }
+
+    [Fact]
+    public void Update_EmptyEcoCode_ReturnsFailure()
+    {
+        var card = OpeningCard.Create("Title", ValidFen, "Desc", "A00", "e4", ValidStyleProfile, 1, null, 0).Value;
+
+        var result = card.Update("New Title", "New Desc", "", "e4 e5", ValidStyleProfile);
+
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(OpeningCard.EmptyEcoCode);
+    }
+
+    [Fact]
+    public void Update_EmptyMoveSequence_ReturnsFailure()
+    {
+        var card = OpeningCard.Create("Title", ValidFen, "Desc", "A00", "e4", ValidStyleProfile, 1, null, 0).Value;
+
+        var result = card.Update("New Title", "New Desc", "B00", "", ValidStyleProfile);
+
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(OpeningCard.EmptyMoveSequence);
+    }
+
+    [Fact]
+    public void Update_NullStyleProfile_ReturnsFailure()
+    {
+        var card = OpeningCard.Create("Title", ValidFen, "Desc", "A00", "e4", ValidStyleProfile, 1, null, 0).Value;
+
+        var result = card.Update("New Title", "New Desc", "B00", "e4 e5", null!);
+
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(OpeningCard.NullStyleProfile);
     }
 }

@@ -5,6 +5,20 @@ namespace PrepChess.Domain.Entities;
 
 public sealed class OpeningCard : BaseEntity
 {
+    public static readonly Error EmptyTitle = new("OpeningCard.EmptyTitle", "Title cannot be empty.");
+    public static readonly Error EmptyDescription = new("OpeningCard.EmptyDescription", "Description cannot be empty.");
+    public static readonly Error InvalidTier = new("OpeningCard.InvalidTier", "Tier must be 1 or greater.");
+    public static readonly Error Tier1MustNotHaveParent = new("OpeningCard.Tier1MustNotHaveParent", "Tier 1 cards cannot have a parent card.");
+    public static readonly Error Tier1MustNotHaveUnlockRequirements = new("OpeningCard.Tier1MustNotHaveUnlockRequirements", "Tier 1 cards cannot have unlock requirements.");
+    public static readonly Error HigherTierMustHaveParent = new("OpeningCard.HigherTierMustHaveParent", "Cards of tier 2 or higher must have a parent card.");
+    public static readonly Error NegativeUnlockGames = new("OpeningCard.NegativeUnlockGames", "Unlock games required cannot be negative.");
+    public static readonly Error EmptyEcoCode = new("OpeningCard.EmptyEcoCode", "ECO code cannot be empty.");
+    public static readonly Error EmptyMoveSequence = new("OpeningCard.EmptyMoveSequence", "Move sequence cannot be empty.");
+    public static readonly Error NullFen = new("OpeningCard.NullFen", "FEN cannot be null.");
+    public static readonly Error NullStyleProfile = new("OpeningCard.NullStyleProfile", "Style profile cannot be null.");
+
+    private readonly List<OpeningCard> _childCards = [];
+
     private OpeningCard(
         string title,
         Fen fen,
@@ -14,8 +28,7 @@ public sealed class OpeningCard : BaseEntity
         CardStyleProfile styleProfile,
         int tier,
         Guid? parentCardId,
-        int unlockGamesRequired,
-        int unlockWinsRequired)
+        int unlockGamesRequired)
     {
         Title = title;
         Fen = fen;
@@ -26,10 +39,9 @@ public sealed class OpeningCard : BaseEntity
         Tier = tier;
         ParentCardId = parentCardId;
         UnlockGamesRequired = unlockGamesRequired;
-        UnlockWinsRequired = unlockWinsRequired;
     }
 
-#pragma warning disable CS8618 // Required properties are set by EF Core via backing fields
+#pragma warning disable CS8618 // Non-nullable properties are initialized by EF Core
     private OpeningCard()
     {
     }
@@ -53,9 +65,9 @@ public sealed class OpeningCard : BaseEntity
 
     public int UnlockGamesRequired { get; private set; }
 
-    public int UnlockWinsRequired { get; private set; }
-
     public OpeningCard? ParentCard { get; private set; }
+
+    public IReadOnlyCollection<OpeningCard> ChildCards => _childCards.AsReadOnly();
 
     public static Result<OpeningCard> Create(
         string title,
@@ -66,54 +78,63 @@ public sealed class OpeningCard : BaseEntity
         CardStyleProfile styleProfile,
         int tier,
         Guid? parentCardId,
-        int unlockGamesRequired,
-        int unlockWinsRequired)
+        int unlockGamesRequired)
     {
         if (string.IsNullOrWhiteSpace(title))
         {
-            return Result.Failure<OpeningCard>(DomainErrors.OpeningCard.EmptyTitle);
+            return Result.Failure<OpeningCard>(EmptyTitle);
+        }
+
+        if (fen is null)
+        {
+            return Result.Failure<OpeningCard>(NullFen);
         }
 
         if (string.IsNullOrWhiteSpace(description))
         {
-            return Result.Failure<OpeningCard>(DomainErrors.OpeningCard.EmptyDescription);
+            return Result.Failure<OpeningCard>(EmptyDescription);
+        }
+
+        if (string.IsNullOrWhiteSpace(ecoCode))
+        {
+            return Result.Failure<OpeningCard>(EmptyEcoCode);
+        }
+
+        if (string.IsNullOrWhiteSpace(moveSequence))
+        {
+            return Result.Failure<OpeningCard>(EmptyMoveSequence);
+        }
+
+        if (styleProfile is null)
+        {
+            return Result.Failure<OpeningCard>(NullStyleProfile);
         }
 
         if (tier < 1)
         {
-            return Result.Failure<OpeningCard>(DomainErrors.OpeningCard.InvalidTier);
+            return Result.Failure<OpeningCard>(InvalidTier);
         }
 
         if (unlockGamesRequired < 0)
         {
-            return Result.Failure<OpeningCard>(DomainErrors.OpeningCard.NegativeUnlockGames);
-        }
-
-        if (unlockWinsRequired < 0)
-        {
-            return Result.Failure<OpeningCard>(DomainErrors.OpeningCard.NegativeUnlockWins);
-        }
-
-        if (unlockWinsRequired > unlockGamesRequired)
-        {
-            return Result.Failure<OpeningCard>(DomainErrors.OpeningCard.UnlockWinsExceedGames);
+            return Result.Failure<OpeningCard>(NegativeUnlockGames);
         }
 
         if (tier == 1)
         {
             if (parentCardId.HasValue)
             {
-                return Result.Failure<OpeningCard>(DomainErrors.OpeningCard.Tier1MustNotHaveParent);
+                return Result.Failure<OpeningCard>(Tier1MustNotHaveParent);
             }
 
-            if (unlockGamesRequired != 0 || unlockWinsRequired != 0)
+            if (unlockGamesRequired != 0)
             {
-                return Result.Failure<OpeningCard>(DomainErrors.OpeningCard.Tier1MustNotHaveUnlockRequirements);
+                return Result.Failure<OpeningCard>(Tier1MustNotHaveUnlockRequirements);
             }
         }
         else if (!parentCardId.HasValue)
         {
-            return Result.Failure<OpeningCard>(DomainErrors.OpeningCard.HigherTierMustHaveParent);
+            return Result.Failure<OpeningCard>(HigherTierMustHaveParent);
         }
 
         return Result.Success(new OpeningCard(
@@ -125,10 +146,12 @@ public sealed class OpeningCard : BaseEntity
             styleProfile,
             tier,
             parentCardId,
-            unlockGamesRequired,
-            unlockWinsRequired));
+            unlockGamesRequired));
     }
 
+    /// <summary>
+    /// Updates the OpeningCard properties.
+    /// </summary>
     public Result Update(
         string title,
         string description,
@@ -138,12 +161,27 @@ public sealed class OpeningCard : BaseEntity
     {
         if (string.IsNullOrWhiteSpace(title))
         {
-            return Result.Failure(DomainErrors.OpeningCard.EmptyTitle);
+            return Result.Failure(EmptyTitle);
         }
 
         if (string.IsNullOrWhiteSpace(description))
         {
-            return Result.Failure(DomainErrors.OpeningCard.EmptyDescription);
+            return Result.Failure(EmptyDescription);
+        }
+
+        if (string.IsNullOrWhiteSpace(ecoCode))
+        {
+            return Result.Failure(EmptyEcoCode);
+        }
+
+        if (string.IsNullOrWhiteSpace(moveSequence))
+        {
+            return Result.Failure(EmptyMoveSequence);
+        }
+
+        if (styleProfile is null)
+        {
+            return Result.Failure(NullStyleProfile);
         }
 
         Title = title;

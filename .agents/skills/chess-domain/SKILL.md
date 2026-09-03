@@ -104,7 +104,7 @@ Each `OpeningCard` stores:
 - **Move Sequence** — SAN moves leading to the FEN (for display)
 - **Tier** — 1 = starter (free), 2+ = unlockable
 - **ParentCardId** — nullable, forms progression tree
-- **UnlockGamesRequired / UnlockWinsRequired** — conditions to unlock from parent
+- **UnlockGamesRequired** — number of games with parent opening needed to unlock
 
 When a game starts with an Opening Card, the `ChessBoard` is initialized with that card's FEN instead of the standard starting position.
 
@@ -114,7 +114,7 @@ When a game starts with an Opening Card, the `ChessBoard` is initialized with th
 Queen's Gambit (Tier 1, free)
 ├── QG Declined (Tier 2) — 20 games in QG
 ├── QG Accepted (Tier 2) — 15 games in QG
-│   └── QGA Central Var (Tier 3) — 10 wins in QGA
+│   └── QGA Central Var (Tier 3) — 10 games in QGA
 └── Catalan Game (Tier 2) — 30 games in QG
 ```
 
